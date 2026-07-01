@@ -1,0 +1,103 @@
+package routes
+
+import (
+	"emoney-603dc/config"
+	"emoney-603dc/handlers"
+	"emoney-603dc/middleware"
+	"emoney-603dc/services"
+
+	firebase "firebase.google.com/go/v4"
+	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
+)
+
+func Setup(db *gorm.DB, rdb *redis.Client, firebaseApp *firebase.App, cfg *config.Config) *gin.Engine {
+	r := gin.New()
+	r.Use(gin.Recovery())
+	r.Use(middleware.Logger())
+
+	jwtSvc := services.NewJWTService(cfg)
+	emailSvc := services.NewEmailService(cfg)
+	otpSvc := services.NewOTPService(db, rdb, firebaseApp, cfg, emailSvc)
+
+	authHandler := handlers.NewAuthHandler(db, firebaseApp, jwtSvc, otpSvc, cfg)
+	otpHandler := handlers.NewOTPHandler(db, otpSvc)
+	paymentHandler := handlers.NewPaymentHandler(db, otpSvc)
+	productHandler := handlers.NewProductHandler(db)
+	cartHandler := handlers.NewCartHandler(db)
+	orderHandler := handlers.NewOrderHandler(db)
+
+	v1 := r.Group("/v1")
+	{
+		v1.GET("/health", handlers.HealthCheck)
+
+		auth := v1.Group("/auth")
+		{
+			auth.POST("/verify-token", authHandler.VerifyToken)
+			auth.POST("/register", authHandler.RegisterWithOTP)
+
+			authRequired := auth.Group("")
+			authRequired.Use(middleware.AuthMiddleware(jwtSvc))
+			{
+				authRequired.GET("/me", authHandler.Me)
+				authRequired.POST("/fcm-token", authHandler.UpdateFCMToken)
+				authRequired.POST("/verify-email-otp", authHandler.VerifyEmailOTP)
+			}
+		}
+
+		otp := v1.Group("/otp")
+		otp.Use(middleware.AuthMiddleware(jwtSvc))
+		{
+			otp.POST("/send-firebase", otpHandler.SendFirebaseOTP)
+			otp.POST("/send-email", otpHandler.SendEmailOTP)
+			otp.POST("/confirm", otpHandler.ConfirmOTP)
+
+			totpGroup := otp.Group("/totp")
+			{
+				totpGroup.POST("/register", otpHandler.RegisterTOTP)
+				totpGroup.POST("/verify", otpHandler.VerifyTOTP)
+			}
+		}
+
+		account := v1.Group("/account")
+		account.Use(middleware.AuthMiddleware(jwtSvc))
+		{
+			account.GET("", paymentHandler.GetAccount)
+			account.GET("/transactions", paymentHandler.GetTransactions)
+		}
+
+		payment := v1.Group("/payment")
+		payment.Use(middleware.AuthMiddleware(jwtSvc))
+		{
+			payment.POST("/topup", paymentHandler.TopUp)
+			payment.POST("/transfer", paymentHandler.Transfer)
+		}
+
+		products := v1.Group("/products")
+		{
+			products.GET("", productHandler.GetProducts)
+			products.GET("/:id", productHandler.GetProductByID)
+		}
+
+		cart := v1.Group("/cart")
+		cart.Use(middleware.AuthMiddleware(jwtSvc))
+		{
+			cart.GET("", cartHandler.GetCart)
+			cart.POST("", cartHandler.AddToCart)
+			cart.PUT("/:id", cartHandler.UpdateCartItem)
+			cart.DELETE("/:id", cartHandler.RemoveCartItem)
+			cart.DELETE("", cartHandler.ClearCart)
+		}
+
+		orders := v1.Group("/orders")
+		orders.Use(middleware.AuthMiddleware(jwtSvc))
+		{
+			orders.GET("", orderHandler.GetMyOrders)
+			orders.GET("/:id", orderHandler.GetOrderByID)
+			orders.POST("/checkout", orderHandler.Checkout)
+		}
+	}
+
+	return r
+}
