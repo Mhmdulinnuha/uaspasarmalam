@@ -50,7 +50,7 @@ class _RegisterPageState extends State<RegisterPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(auth.errorMessage ?? 'Pendaftaran gagal'),
-          backgroundColor: Colors.red,
+          backgroundColor: const Color(0xFFD84315),
         ),
       );
     }
@@ -60,102 +60,35 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget build(BuildContext context) {
     final isLoading = context.watch<AuthProvider>().isLoading;
 
-    return LoadingOverlay(
+        return LoadingOverlay(
       isLoading: isLoading,
       message: 'Mendaftarkan akun...',
       child: Scaffold(
+        backgroundColor: const Color(0xFFFFF8F0),
         body: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  const SizedBox(height: 32),
-                  const AuthHeader(
-                    icon: Icons.person_add_alt_1,
-                    title: 'Buat Akun Baru',
-                    subtitle: 'Lengkapi data diri Anda untuk mendaftar',
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 430),
+                child: Card(
+                  elevation: 8,
+                  shadowColor: Colors.orange.withOpacity(0.2),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
                   ),
-                  const SizedBox(height: 32),
-                  CustomTextField(
-                    label: 'Nama Lengkap',
-                    hint: 'Masukkan nama lengkap',
-                    controller: _nameCtrl,
-                    prefixIcon: const Icon(Icons.person_outline),
-                    validator: (v) =>
-                        (v?.isEmpty ?? true) ? 'Nama wajib diisi' : null,
-                  ),
-                  const SizedBox(height: 16),
-                  CustomTextField(
-                    label: 'Email',
-                    hint: 'contoh@email.com',
-                    controller: _emailCtrl,
-                    keyboardType: TextInputType.emailAddress,
-                    prefixIcon: const Icon(Icons.email_outlined),
-                    validator: (v) {
-                      if (v?.isEmpty ?? true) return 'Email wajib diisi';
-                      if (!EmailValidator.validate(v!)) {
-                        return 'Format email salah';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  CustomTextField(
-                    label: 'Password',
-                    hint: 'Minimal 8 karakter',
-                    controller: _passCtrl,
-                    obscureText: !_showPass,
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _showPass ? Icons.visibility_off : Icons.visibility,
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          // ... seluruh isi form yang sudah kamu buat ...
+                        ],
                       ),
-                      onPressed: () =>
-                          setState(() => _showPass = !_showPass),
                     ),
-                    validator: (v) => (v?.length ?? 0) < 8
-                        ? 'Password minimal 8 karakter'
-                        : null,
                   ),
-                  const SizedBox(height: 16),
-                  CustomTextField(
-                    label: 'Konfirmasi Password',
-                    hint: 'Ulangi password',
-                    controller: _pass2Ctrl,
-                    obscureText: !_showPass,
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    validator: (v) =>
-                        v != _passCtrl.text ? 'Password tidak cocok' : null,
-                  ),
-                  const SizedBox(height: 28),
-                  CustomButton(
-                    label: 'Daftar Sekarang',
-                    onPressed: _register,
-                    isLoading: isLoading,
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text('Sudah punya akun? '),
-                      GestureDetector(
-                        onTap: () => Navigator.pushReplacementNamed(
-                          context,
-                          AppRouter.login,
-                        ),
-                        child: const Text(
-                          'Masuk',
-                          style: TextStyle(
-                            color: Color(0xFF1565C0),
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                ),
               ),
             ),
           ),
@@ -163,4 +96,4 @@ class _RegisterPageState extends State<RegisterPage> {
       ),
     );
   }
-}
+}  

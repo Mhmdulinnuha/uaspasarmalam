@@ -91,13 +91,14 @@ func Setup(db *gorm.DB, rdb *redis.Client, firebaseApp *firebase.App, cfg *confi
 		}
 
 		orders := v1.Group("/orders")
-		orders.Use(middleware.AuthMiddleware(jwtSvc))
-		{
-			orders.GET("", orderHandler.GetMyOrders)
-			orders.GET("/:id", orderHandler.GetOrderByID)
-			orders.POST("/checkout", orderHandler.Checkout)
+			orders.Use(middleware.AuthMiddleware(jwtSvc))
+			{
+				orders.GET("", orderHandler.GetMyOrders)
+				orders.GET("/:id", orderHandler.GetOrderByID)
+				orders.POST("/checkout", orderHandler.Checkout)
+				orders.PUT("/:id/mark-paid", orderHandler.MarkAsPaid)
+			}
 		}
-	}
 
 	return r
 }

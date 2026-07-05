@@ -63,7 +63,7 @@ class _LoginPageState extends State<LoginPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(auth.errorMessage ?? 'Login gagal'),
-          backgroundColor: Colors.red,
+          backgroundColor: Color(0xFFD84315),
         ),
       );
     }
@@ -117,9 +117,9 @@ class _LoginPageState extends State<LoginPage> {
                 children: [
                   const SizedBox(height: 32),
                   const AuthHeader(
-                    icon: Icons.lock_open_outlined,
-                    title: 'Selamat Datang',
-                    subtitle: 'Masuk ke akun Anda untuk melanjutkan',
+                    icon: Icons.restaurant_menu,
+                    title: 'FoodHub',
+                    subtitle: 'Nikmati kuliner favoritmu setiap hari',
                   ),
                   const SizedBox(height: 32),
                   CustomTextField(
@@ -164,6 +164,7 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 8),
                   CustomButton(
                     label: 'Masuk',
+                    backgroundColor: const Color(0xFFFF6B35),
                     onPressed: _loginEmail,
                     isLoading: isLoading,
                   ),
@@ -187,7 +188,7 @@ class _LoginPageState extends State<LoginPage> {
                         child: const Text(
                           'Daftar',
                           style: TextStyle(
-                            color: Color(0xFF1565C0),
+                            color: Color(0xFFFF6B35),
                             fontWeight: FontWeight.bold,
                           ),
                         ),

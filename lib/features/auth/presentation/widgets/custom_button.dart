@@ -8,6 +8,7 @@ class CustomButton extends StatelessWidget {
   final bool isLoading;
   final ButtonVariant variant;
   final Widget? icon;
+  final Color backgroundColor;
 
   const CustomButton({
     super.key,
@@ -16,6 +17,7 @@ class CustomButton extends StatelessWidget {
     this.isLoading = false,
     this.variant = ButtonVariant.primary,
     this.icon,
+    this.backgroundColor = const Color(0xFFFF6B35),
   });
 
   @override

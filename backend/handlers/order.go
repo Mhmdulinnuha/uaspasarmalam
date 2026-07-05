@@ -206,3 +206,48 @@ func (h *OrderHandler) GetOrderByID(c *gin.Context) {
 		"data":    order,
 	})
 }
+
+func (h *OrderHandler) MarkAsPaid(c *gin.Context) {
+	userID := c.GetUint("user_id")
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "ID pesanan tidak valid",
+		})
+		return
+	}
+
+	var order models.Order
+	if err := h.db.Where("id = ? AND user_id = ?", id, userID).First(&order).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": "Pesanan tidak ditemukan",
+		})
+		return
+	}
+
+	order.Status = "paid"
+	if err := h.db.Save(&order).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Gagal memperbarui status pesanan",
+		})
+		return
+	}
+
+	// Preload items again
+	if err := h.db.Preload("Items").First(&order, id).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Gagal mengambil pesanan",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"data":    order,
+	})
+}

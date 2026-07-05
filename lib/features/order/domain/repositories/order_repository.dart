@@ -11,4 +11,7 @@ abstract class OrderRepository {
 
   /// Cek status pembayaran terkini untuk order tertentu
   Future<OrderModel> checkPaymentStatus(int orderId);
+
+  /// Tandai pesanan sebagai sudah dibayar (manual)
+  Future<OrderModel> markAsPaid(int orderId);
 }

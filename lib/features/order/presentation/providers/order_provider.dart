@@ -154,6 +154,22 @@ class OrderProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> markAsPaid(int orderId) async {
+    _paymentCheckStatus = PaymentCheckStatus.checking;
+    notifyListeners();
+    try {
+      final updatedOrder = await _repository.markAsPaid(orderId);
+      _lastOrder = updatedOrder;
+      if (_isPaid(updatedOrder.status)) {
+        _paymentCheckStatus = PaymentCheckStatus.paid;
+      }
+    } catch (e) {
+      // Ignore error, just keep checking
+    } finally {
+      notifyListeners();
+    }
+  }
+
   @override
   void dispose() {
     _pollingTimer?.cancel();

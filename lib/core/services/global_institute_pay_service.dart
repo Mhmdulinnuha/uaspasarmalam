@@ -27,7 +27,7 @@ class PaymentCallbackData {
 // ── Service ───────────────────────────────────────────────────
 
 /// Mengelola deeplink keluar ke Dompet Kampus Global
-/// dan deeplink masuk (callback pembayaran) ke Pasar Malam.
+/// dan deeplink masuk (callback pembayaran / shop) ke Pasar Malam.
 class GlobalInstitutePayService {
  static final GlobalInstitutePayService _instance = GlobalInstitutePayService._();
  factory GlobalInstitutePayService() => _instance;
@@ -38,7 +38,12 @@ class GlobalInstitutePayService {
  final _callbackController = StreamController<PaymentCallbackData>.broadcast();
  Stream<PaymentCallbackData> get onCallback => _callbackController.stream;
 
+ /// Stream untuk notifikasi bahwa app dibuka via deeplink shop
+ final _shopDeeplinkController = StreamController<void>.broadcast();
+ Stream<void> get onShopDeeplink => _shopDeeplinkController.stream;
+
  PaymentCallbackData? _pendingCallback;
+ bool _pendingShopDeeplink = false;
 
  /// Ambil callback cold-start, dikosongkan setelah dibaca (consume-once).
  PaymentCallbackData? consumePendingCallback() {
@@ -46,6 +51,16 @@ class GlobalInstitutePayService {
  _pendingCallback = null;
  if (data != null) {
  _log(_tag, ' Mengonsumsi pending cold-start callback: $data');
+ }
+ return data;
+ }
+
+ /// Ambil shop deeplink cold-start, dikosongkan setelah dibaca.
+ bool consumePendingShopDeeplink() {
+ final data = _pendingShopDeeplink;
+ _pendingShopDeeplink = false;
+ if (data) {
+ _log(_tag, ' Mengonsumsi pending cold-start shop deeplink');
  }
  return data;
  }
@@ -95,11 +110,25 @@ class GlobalInstitutePayService {
  'path=${uri.path} params=${uri.queryParameters} | coldStart=$isColdStart',
  );
 
- // Filter: hanya proses callback Pasar Malam
+ // Filter: hanya proses skema pasarmalam
  if (uri.scheme != 'pasarmalam') {
  _log(_tag, '⏩ Diabaikan — bukan skema pasarmalam (scheme=${uri.scheme})');
  return;
  }
+
+ // Handle shop deeplink (dari DKG)
+ if (uri.host == 'shop') {
+ _log(_tag, ' Shop deeplink diterima — buka dashboard');
+ if (isColdStart) {
+ _pendingShopDeeplink = true;
+ _log(_tag, ' Disimpan sebagai pending cold-start shop deeplink');
+ }
+ _shopDeeplinkController.add(null);
+ _log(_tag, ' Event shop dikirim ke stream');
+ return;
+ }
+
+ // Handle payment callback
  if (uri.host != 'payment-callback') {
  _log(_tag, '⏩ Diabaikan — bukan host payment-callback (host=${uri.host})');
  return;
@@ -125,39 +154,42 @@ class GlobalInstitutePayService {
  // ── Build URL keluar ─────────────────────────────────────────
 
  /// Membangun URL deeplink ke Dompet Kampus Global sesuai spesifikasi.
- static String buildDeeplinkUrl({
- required int orderId,
- required double amount,
- String? description,
- }) {
- const scheme = 'dompetkampus';
- const host = 'pay';
- final desc = (description != null && description.isNotEmpty) ? description : 'Order #$orderId';
- const callbackUrl = 'pasarmalam://payment-callback';
+  static String buildDeeplinkUrl({
+    required int orderId,
+    required double amount,
+    String? description,
+  }) {
+    const scheme = 'dompet_kampus_global';
+    const host = 'pay';
+    final desc = (description != null && description.isNotEmpty) ? description : 'Order #$orderId';
 
- _log(_tag, ' Membangun deeplink URL:');
- _log(_tag, 'merchant_id : MCH_PASAR_MALAM');
- _log(_tag, 'merchant_name: Pasar Malam');
- _log(_tag, 'amount : ${amount.toInt()}');
- _log(_tag, 'description : $desc');
- _log(_tag, 'reference : INV-$orderId');
- _log(_tag, 'callback : $callbackUrl');
+    // Callback URL dengan format yang benar untuk Dompet Kampus Global
+    const callbackUrl = 'pasarmalam://payment-callback';
 
- final uri = Uri(
- scheme: scheme,
- host: host,
- queryParameters: {
- 'merchant_id': 'MCH_PASAR_MALAM',
- 'merchant_name': 'Pasar Malam',
- 'amount': amount.toInt().toString(),
- 'description': desc,
- 'reference': 'INV-$orderId',
- 'callback': callbackUrl,
- },
- );
+    _log(_tag, ' Membangun deeplink URL:');
+    _log(_tag, '   merchant_id : MCH_PASAR_MALAM');
+    _log(_tag, '   merchant_name: Pasar Malam');
+    _log(_tag, '   amount : ${amount.toInt()}');
+    _log(_tag, '   description : $desc');
+    _log(_tag, '   reference : INV-$orderId');
+    _log(_tag, '   callback : $callbackUrl');
 
- final result = uri.toString();
- _log(_tag, ' URL lengkap (sebelum launch): $result');
- return result;
- }
+    // Build URL dengan Uri.parse untuk memastikan encoding yang benar
+    final uri = Uri(
+      scheme: scheme,
+      host: host,
+      queryParameters: {
+        'merchant_id': 'MCH_PASAR_MALAM',
+        'merchant_name': 'Pasar Malam',
+        'amount': amount.toInt().toString(),
+        'description': desc,
+        'reference': 'INV-$orderId',
+        'callback': callbackUrl,
+      },
+    );
+
+    final result = uri.toString();
+    _log(_tag, ' URL lengkap (sebelum launch): $result');
+    return result;
+  }
 }

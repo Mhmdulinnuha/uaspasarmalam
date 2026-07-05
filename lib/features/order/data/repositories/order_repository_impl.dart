@@ -61,6 +61,14 @@ class OrderRepositoryImpl implements OrderRepository {
  }
 
  @override
- Future<OrderModel> checkPaymentStatus(int orderId) =>
- getOrderDetail(orderId);
+  Future<OrderModel> checkPaymentStatus(int orderId) =>
+      getOrderDetail(orderId);
+
+  @override
+  Future<OrderModel> markAsPaid(int orderId) async {
+    final response = await DioClient.instance.put(
+      '${ApiConstants.orders}/$orderId/mark-paid',
+    );
+    return OrderModel.fromJson(response.data['data']);
+  }
 }
