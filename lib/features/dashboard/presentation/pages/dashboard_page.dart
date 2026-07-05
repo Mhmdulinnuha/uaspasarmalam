@@ -21,14 +21,14 @@ class _DashboardPageState extends State<DashboardPage> {
   final _searchCtrl = TextEditingController();
 
   final List<_CategoryItem> _categories = const [
-    _CategoryItem(label: 'All', icon: Icons.apps),
-    _CategoryItem(label: 'Running', icon: Icons.directions_run),
-    _CategoryItem(label: 'Lifestyle', icon: Icons.style),
-    _CategoryItem(label: 'Football', icon: Icons.sports_soccer),
-    _CategoryItem(label: 'Volleyball', icon: Icons.sports_volleyball),
-    _CategoryItem(label: 'Tennis', icon: Icons.sports_tennis),
-    _CategoryItem(label: 'Badminton', icon: Icons.sports),
-  ];
+  _CategoryItem(label: 'Semua', icon: Icons.grid_view_rounded),
+  _CategoryItem(label: 'Makanan', icon: Icons.restaurant),
+  _CategoryItem(label: 'Minuman', icon: Icons.local_drink),
+  _CategoryItem(label: 'Snack', icon: Icons.cookie),
+  _CategoryItem(label: 'Dessert', icon: Icons.icecream),
+  _CategoryItem(label: 'Pedas', icon: Icons.local_fire_department),
+  _CategoryItem(label: 'Promo', icon: Icons.local_offer),
+];
 
   @override
   void initState() {
@@ -291,7 +291,7 @@ class _SearchBar extends StatelessWidget {
         controller: controller,
         onChanged: onChanged,
         decoration: InputDecoration(
-          hintText: 'Puma, Running, Training...',
+          hintText: 'Cari makanan atau minuman...',
           hintStyle: TextStyle(color: hintColor, fontSize: 14),
           prefixIcon: Icon(Icons.search, color: hintColor, size: 22),
           border: InputBorder.none,
@@ -313,7 +313,10 @@ class _BannerCard extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         gradient: const LinearGradient(
-          colors: [Color(0xFF1565C0), Color(0xFF42A5F5)],
+         colors: [
+    Color(0xFFFF6B35),
+    Color(0xFFFFA726),
+  ],
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
         ),
@@ -341,7 +344,7 @@ class _BannerCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Text(
-                  'New Collections!',
+                  'Festival Kuliner Pasar Malam Diskon hingga 50% Nikmati makanan favoritmu',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 20,
