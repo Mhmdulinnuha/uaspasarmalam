@@ -11,6 +11,7 @@ class CartProductModel {
     required this.price,
     required this.imageUrl,
     required this.category,
+    
   });
 
   factory CartProductModel.fromJson(Map<String, dynamic> json) =>

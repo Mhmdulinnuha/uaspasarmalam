@@ -4,6 +4,10 @@ import 'package:pasar_malam/features/cart/data/models/cart_model.dart';
 import 'package:pasar_malam/features/cart/presentation/providers/cart_provider.dart';
 import 'package:provider/provider.dart';
 
+const primaryColor = Color(0xFFFF6B35);
+const backgroundColor = Color(0xFFFFF8F0);
+const cardColor = Colors.white;
+
 class CartPage extends StatefulWidget {
   const CartPage({super.key});
 
@@ -61,94 +65,23 @@ class _CartPageState extends State<CartPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Keranjang Belanja'),
-        actions: [
-          Consumer<CartProvider>(
-            builder: (context, cartProv, _) {
-              final hasItems =
-                  cartProv.cart != null && cartProv.cart!.items.isNotEmpty;
-              if (!hasItems) return const SizedBox.shrink();
-              return IconButton(
-                icon: const Icon(Icons.delete_outline),
-                tooltip: 'Hapus Semua',
-                onPressed: () => _confirmClearCart(context, cartProv),
-              );
-            },
-          ),
-        ],
-      ),
-      body: Consumer<CartProvider>(
-        builder: (context, cartProv, _) {
-          if (cartProv.status == CartStatus.loading ||
-              cartProv.status == CartStatus.initial) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (cartProv.status == CartStatus.error) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 48, color: Colors.red),
-                  const SizedBox(height: 12),
-                  Text(cartProv.error ?? 'Terjadi kesalahan'),
-                  const SizedBox(height: 16),
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('Coba Lagi'),
-                    onPressed: () => cartProv.fetchCart(),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          final cart = cartProv.cart;
-          if (cart == null || cart.items.isEmpty) {
-            return _EmptyCartView();
-          }
-
-          return Column(
-            children: [
-              Expanded(
-                child: RefreshIndicator(
-                  onRefresh: () => cartProv.fetchCart(),
-                  child: ListView.separated(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: cart.items.length,
-                    separatorBuilder: (context, index) => const SizedBox(height: 12),
-                    itemBuilder: (ctx, i) => _CartItemCard(
-                      item: cart.items[i],
-                      formatPrice: _formatPrice,
-                      onRemove: () => cartProv.removeItem(cart.items[i].id),
-                      onDecrease: () {
-                        final qty = cart.items[i].quantity - 1;
-                        if (qty <= 0) {
-                          cartProv.removeItem(cart.items[i].id);
-                        } else {
-                          cartProv.updateItem(cart.items[i].id, qty);
-                        }
-                      },
-                      onIncrease: () => cartProv.updateItem(
-                        cart.items[i].id,
-                        cart.items[i].quantity + 1,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              _CartBottomBar(
-                total: cart.total,
-                formatPrice: _formatPrice,
-                onCheckout: () {
-                  Navigator.pushNamed(context, AppRouter.checkout);
-                },
-              ),
-            ],
-          );
-        },
-      ),
+      backgroundColor: backgroundColor,
+     appBar: AppBar(
+  backgroundColor: Colors.white,
+  elevation: 0,
+  centerTitle: true,
+  title: const Text(
+    "Keranjang Saya",
+    style: TextStyle(
+      color: Color(0xFF2E2E2E),
+      fontWeight: FontWeight.bold,
+      fontSize: 22,
+    ),
+  ),
+  iconTheme: const IconThemeData(
+    color: Color(0xFFFF6B35),
+  ),
+),
     );
   }
 }
@@ -221,17 +154,17 @@ class _CartItemCard extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
 
     return Container(
-      decoration: BoxDecoration(
-        color: surface,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+     decoration: BoxDecoration(
+  color: Colors.white,
+  borderRadius: BorderRadius.circular(18),
+  boxShadow: [
+    BoxShadow(
+      color: Colors.grey.withOpacity(.15),
+      blurRadius: 12,
+      offset: const Offset(0,5),
+    ),
+  ],
+),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Row(
