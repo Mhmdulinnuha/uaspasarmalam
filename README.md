@@ -67,9 +67,9 @@ pasar_malam/
 
 # Screenshoot
 <p align="center">
-  <img src="assets/readme/login.png" width="220"/>
-  <img src="assets/readme/cart.png" width="220"/>
-  <img src="assets/readme/dashboard.png" width="220"/>
+  <img src="assets/redme/login.png" width="220"/>
+  <img src="assets/redme/cart.png" width="220"/>
+  <img src="assets/redme/dashboard.png" width="220"/>
 </p>
 
 # Teknologi
