@@ -3,6 +3,7 @@
 Aplikasi mobile marketplace jajanan pasar malam. User bisa browsing produk makanan & minuman, masukin ke keranjang, checkout, dan lihat status pesanan. Dibangun pakai Flutter dengan state management Provider.
 
 # Struktur project
+```text 
 pasar_malam/
 ├── lib/
 │   ├── core/                              # Core / shared modules
@@ -63,6 +64,7 @@ pasar_malam/
 │   └── icons/
 ├── pubspec.yaml
 └── README.md
+```
 
 
 # Screenshoot
